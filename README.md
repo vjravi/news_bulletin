@@ -9,17 +9,16 @@ Aggregates AI/ML news from HackerNews, Reddit (r/LocalLLaMA), TLDR AI, and Huggi
 ### Prerequisites
 
 - Docker and Docker Compose
+- [Ollama](https://ollama.com) running on your host machine with the model pulled
 
 ### 1. Start Ollama and pull the model
 
 ```bash
-docker compose up ollama -d
-
 # Pull the model (one-time, ~5 GB)
-docker compose exec ollama ollama pull qwen3:8b
+ollama pull qwen3.5:9b
 ```
 
-Wait for the pull to finish before running the pipeline.
+The pipeline connects to Ollama running on your host — no separate Ollama container needed.
 
 ### 2. Run the pipeline
 
@@ -47,7 +46,7 @@ Or just double-click `output/bulletin.html` in Finder.
 - [Ollama](https://ollama.com) running locally with the model pulled
 
 ```bash
-ollama pull qwen3:8b
+ollama pull qwen3.5:9b
 ```
 
 ### Install dependencies
@@ -120,8 +119,9 @@ OLLAMA_BASE_URL=http://192.168.1.10:11434 python -m src.graph
 - HackerNews and Reddit are public APIs — check network/firewall
 - TLDR AI and HuggingFace Papers scrape HTML; a site layout change may break parsing
 
-**Docker: pipeline exits before Ollama is ready**
-- Pull the model first (`docker compose exec ollama ollama pull qwen3:8b`) and wait for it to finish before running the pipeline
+**Docker: pipeline can't reach Ollama**
+- Ensure Ollama is running on your host: `ollama serve`
+- Confirm the model is pulled: `ollama list`
 
 ---
 
