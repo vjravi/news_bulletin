@@ -72,7 +72,7 @@ Edit `config.yaml` to change sources, model, or output paths:
 
 ```yaml
 ollama:
-  model: "qwen3:8b"          # any model pulled in Ollama
+  model: "qwen3.5:9b"          # any model pulled in Ollama
   base_url: "http://localhost:11434"
 
 sources:
