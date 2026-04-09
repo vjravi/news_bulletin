@@ -1,0 +1,25 @@
+ollama:
+  model: "qwen3:8b"
+  base_url: "http://localhost:11434"
+
+sources:
+  hackernews:
+    enabled: true
+    max_items: 20
+  reddit:
+    enabled: true
+    subreddits:
+      - "LocalLLaMA"
+    max_items: 15
+  tldr:
+    enabled: true
+  papers:
+    enabled: true
+    filter: "date"  # date | week | month
+
+storage:
+  data_dir: "./data"
+  retention_days: 7
+
+output:
+  html_path: "./output/bulletin.html"

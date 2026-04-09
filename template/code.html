@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>News Bulletin - Sand Edition</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "sunset-orange": "#fb923c",
+                        "sunset-rose": "#f43f5e",
+                        "sand-light": "#fdf8f1",
+                        "sand-sidebar": "#f8f0e3",
+                        "desert-dusk": "#431407",
+                    },
+                    fontFamily: {
+                        "sans": ["'Plus Jakarta Sans'", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --real-sunset: linear-gradient(to bottom right, #ffffff, #fffaf5, #fff4e6);
+            --dune-color: #f1e4d1;
+        }
+        body {
+            background: var(--real-sunset);
+            background-attachment: fixed;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+        .desert-watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            background-image: radial-gradient(circle at 50% 30%, #fff7ed 0%, transparent 60%),
+                              radial-gradient(ellipse at 50% 100%, #fdf2e9 0%, transparent 70%);
+            z-index: -1;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .dune-svg {
+            fill: #f5e6d3;
+        }
+        .caravan-svg {
+            fill: #7c2d12;
+            opacity: 0.25;
+        }
+        .bottom-banner {
+            background: linear-gradient(to top, #f5e6d3 0%, transparent 100%);
+        }
+    </style>
+</head>
+<body class="text-orange-950 min-h-screen relative pb-32">
+<div class="desert-watermark"></div>
+<header class="sticky top-0 z-50 w-full border-b border-orange-100 bg-white/70 backdrop-blur-xl">
+<div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="bg-gradient-to-br from-sunset-orange to-sunset-rose p-2 rounded-xl text-white shadow-lg shadow-orange-200">
+<span class="material-symbols-outlined block text-xl">landscape</span>
+</div>
+<div>
+<h1 class="text-lg font-extrabold leading-tight text-orange-950 tracking-tight">News Bulletin</h1>
+<p class="text-[10px] uppercase tracking-widest text-orange-500 font-bold">Sand Edition</p>
+</div>
+</div>
+<div class="hidden md:flex items-center gap-1 text-orange-300">
+<span class="text-xs font-semibold uppercase tracking-wider">The ToolShed</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-xs font-semibold uppercase tracking-wider text-orange-900">Oasis Reader</span>
+</div>
+</div>
+<div class="flex items-center gap-4 flex-1 justify-end max-w-xl">
+<div class="relative w-full max-w-xs group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-orange-400 group-focus-within:text-sunset-orange transition-colors">search</span>
+<input class="w-full bg-orange-50/50 border-orange-100 border rounded-xl pl-10 pr-4 h-10 text-sm focus:ring-2 focus:ring-sunset-orange/20 focus:border-sunset-orange transition-all placeholder:text-orange-300" placeholder="Sift through the sands..." type="text"/>
+</div>
+<button class="flex items-center gap-2 bg-orange-950 hover:bg-black text-white px-5 h-10 rounded-xl text-sm font-bold transition-all shadow-md shadow-orange-900/10 shrink-0">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+<span class="hidden sm:inline">Home</span>
+</button>
+<div class="size-10 rounded-full border-2 border-white shadow-sm bg-cover bg-center ring-1 ring-orange-100" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBN_ewnGuae4iIu_42a8ZRFBVeVuM7mJbS0RQ-7JHZpvzLl1yCkGBY55G2XVvYPRtU-gVtBEfZs5XEZiTYNtXlcnjY69P46B9EbpQnnHvya6dLZGdF-LxWha4swjN1nBqkwGTE1NNmxOMaX_4grTuiFsm03F4-FbRQ2-SzBtvLG4SWNKxAwct__cBw6f0uTuB1E_qcCrJl9pgd0Z0XPZMCcr_YMILJQenLggHIDXx4d6O6-jHixECTr1YJM9tQXpAPUMqPxQ_ScDMk7')"></div>
+</div>
+</div>
+</header>
+<div class="max-w-[1440px] mx-auto flex">
+<aside class="w-64 shrink-0 hidden lg:block sticky top-16 h-[calc(100vh-64px)] overflow-y-auto bg-sand-sidebar/30 border-r border-orange-50 p-6 custom-scrollbar">
+<div class="space-y-8">
+<div class="space-y-4">
+<h3 class="text-[11px] font-black uppercase tracking-[0.2em] text-orange-400 px-3">Sands of News</h3>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white text-sunset-orange font-bold shadow-sm border border-orange-100" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-sm">Main Oasis</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/60 transition-all text-orange-800/70 hover:text-orange-950 font-medium" href="#">
+<span class="material-symbols-outlined">memory</span>
+<span class="text-sm">Tech Mirage</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/60 transition-all text-orange-800/70 hover:text-orange-950 font-medium" href="#">
+<span class="material-symbols-outlined">public</span>
+<span class="text-sm">Global Dunes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/60 transition-all text-orange-800/70 hover:text-orange-950 font-medium" href="#">
+<span class="material-symbols-outlined">location_on</span>
+<span class="text-sm">Local Sands</span>
+</a>
+</nav>
+</div>
+<div class="space-y-4">
+<h3 class="text-[11px] font-black uppercase tracking-[0.2em] text-orange-400 px-3">Caravans</h3>
+<div class="space-y-2">
+<button class="flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-white/40 border border-orange-100/50 text-sm font-semibold text-orange-900 hover:bg-white transition-colors">
+<span>Tech Reader</span>
+<span class="material-symbols-outlined text-sm opacity-50">expand_more</span>
+</button>
+<button class="flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-white/40 border border-orange-100/50 text-sm font-semibold text-orange-900 hover:bg-white transition-colors">
+<span>World News</span>
+<span class="material-symbols-outlined text-sm opacity-50">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 p-6 lg:p-10">
+<div class="flex gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide">
+<button class="px-6 py-2 rounded-full bg-orange-950 text-white text-xs font-bold uppercase tracking-widest shadow-lg shadow-orange-900/20 border-none shrink-0">Fresh Winds</button>
+<button class="px-6 py-2 rounded-full bg-white border border-orange-100 text-orange-600 text-xs font-bold uppercase tracking-widest hover:bg-orange-50 transition-colors shrink-0">Rising Sun</button>
+<button class="px-6 py-2 rounded-full bg-white border border-orange-100 text-orange-600 text-xs font-bold uppercase tracking-widest hover:bg-orange-50 transition-colors shrink-0">Unread</button>
+<button class="px-6 py-2 rounded-full bg-white border border-orange-100 text-orange-600 text-xs font-bold uppercase tracking-widest hover:bg-orange-50 transition-colors shrink-0">Pinned</button>
+</div>
+<div class="columns-1 md:columns-2 xl:columns-3 gap-8 space-y-8">
+<article class="break-inside-avoid bg-white border border-orange-100/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-orange-900/5 transition-all group flex flex-col relative">
+<div class="relative aspect-video overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAnHPDPe6gsICRAOxxKOyka81moYG2VdZjc9Q5Hy0GOiZO2goxA_mybDJTJpY7TtPUA7vG6bRtvttDOss7N4oCh6OyBqalsWVoiNIUzTyIDo6-7Y5OSKWdgSfkwCfKgrZoe-RTotKIMigi9OcUlrvqwb5FKXpdghkk1Tiqo2aonKPtsFhbYwuPC7_1fUnPwdcovkYwmBnFz9NctWoyl2jv0IThU0ymFKtoUMMD3Gh1oJ5k2MdOso2ZRb2qsk7mkJ4DG7BWRRWYpM1LK')"></div>
+<div class="absolute top-4 left-4 bg-orange-950/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-black text-white uppercase tracking-[0.15em]">Technology</div>
+</div>
+<div class="p-6 flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-bold text-orange-400 uppercase tracking-wider">2h ago • Local Oasis</span>
+</div>
+<h2 class="text-xl font-bold leading-tight text-orange-950 group-hover:text-sunset-orange transition-colors">AI Revolution in Home Servers: Local Hardware Changes</h2>
+<p class="text-sm text-orange-900/70 leading-relaxed line-clamp-3">Exploring how local hardware is changing with AI-specific chips. Many home lab enthusiasts are now opting for NPU-enabled processors to run local LLMs...</p>
+<div class="mt-2 pt-5 border-t border-orange-50 flex items-center justify-between">
+<a class="text-sm font-extrabold text-sunset-orange flex items-center gap-2 group/link" href="#">
+                                Read Story
+                                <span class="material-symbols-outlined text-lg group-hover/link:translate-x-1 transition-transform">arrow_right_alt</span>
+</a>
+<button class="text-orange-200 hover:text-sunset-orange transition-colors">
+<span class="material-symbols-outlined text-2xl">bookmark</span>
+</button>
+</div>
+</div>
+</article>
+<article class="break-inside-avoid bg-white border border-orange-100/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-orange-900/5 transition-all group flex flex-col">
+<div class="p-6 flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-bold text-orange-400 uppercase tracking-wider">4h ago • Global Dunes</span>
+</div>
+<h2 class="text-xl font-bold leading-tight text-orange-950 group-hover:text-sunset-orange transition-colors">Global Climate Summit: New Carbon Neutrality Targets</h2>
+<p class="text-sm text-orange-900/70 leading-relaxed line-clamp-4">World leaders have gathered in Zurich to discuss an accelerated timeline for carbon emissions reductions. The new proposal suggests a 15% increase in renewable energy subsidies globally.</p>
+<div class="mt-2 pt-5 border-t border-orange-50 flex items-center justify-between">
+<a class="text-sm font-extrabold text-sunset-orange flex items-center gap-2 group/link" href="#">
+                                Full Coverage
+                                <span class="material-symbols-outlined text-lg group-hover/link:translate-x-1 transition-transform">arrow_right_alt</span>
+</a>
+<button class="text-orange-200 hover:text-sunset-orange transition-colors">
+<span class="material-symbols-outlined text-2xl">bookmark</span>
+</button>
+</div>
+</div>
+</article>
+<article class="break-inside-avoid bg-white border border-orange-100/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-orange-900/5 transition-all group flex flex-col">
+<div class="relative aspect-[4/3] overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBxO55PnAZ9GFBmnXBsh3xEyTF64_Zuu3M2KeassQLPuo8kNkNsx2Q5RKCHQgq85zEMFi_W3bX0SrA75oC_n0SMfBTr2ENxcevMZnPpeQp6Ibdzlm1FNr0x9ZiiIP7uhcSIcabL7cJjwT0M4Wou6TuSXJpdw2lWq_W0J44gefPlCGAmHblB-g5mnu1g0NfDSgJbXL0uVytroNsKoKtkTOOp-l8NdDHnPZLtmBMQFJqlHMWLzkzaYiVVSOksZEMFtw8AWfuyDqpg3HkC')"></div>
+<div class="absolute top-4 left-4 bg-orange-950/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-black text-white uppercase tracking-[0.15em]">Hardware</div>
+</div>
+<div class="p-6 flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-bold text-orange-400 uppercase tracking-wider">5h ago • The Tech Mirage</span>
+</div>
+<h2 class="text-xl font-bold leading-tight text-orange-950 group-hover:text-sunset-orange transition-colors">Unified Smart Home OS Announced</h2>
+<p class="text-sm text-orange-900/70 leading-relaxed">The battle for the smart home dashboard takes a surprising turn as major manufacturers agree on a new open standard for connectivity...</p>
+<div class="mt-2 pt-5 border-t border-orange-50 flex items-center justify-between">
+<a class="text-sm font-extrabold text-sunset-orange flex items-center gap-2 group/link" href="#">
+                                Read Story
+                                <span class="material-symbols-outlined text-lg group-hover/link:translate-x-1 transition-transform">arrow_right_alt</span>
+</a>
+<button class="text-orange-200 hover:text-sunset-orange transition-colors">
+<span class="material-symbols-outlined text-2xl">bookmark</span>
+</button>
+</div>
+</div>
+</article>
+<article class="break-inside-avoid bg-white border border-orange-100/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-orange-900/5 transition-all group flex flex-col">
+<div class="p-6 flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-bold text-orange-400 uppercase tracking-wider">1d ago • Local Sands</span>
+</div>
+<h2 class="text-xl font-bold leading-tight text-orange-950 group-hover:text-sunset-orange transition-colors">New Community Garden Opens Downtown</h2>
+<p class="text-sm text-orange-900/70 leading-relaxed">Residents celebrated the grand opening of the "Green Haven" community garden on 5th Street yesterday. The project features 50 individual plots...</p>
+<div class="mt-2 pt-5 border-t border-orange-50 flex items-center justify-between">
+<a class="text-sm font-extrabold text-sunset-orange flex items-center gap-2 group/link" href="#">
+                                Read Story
+                                <span class="material-symbols-outlined text-lg group-hover/link:translate-x-1 transition-transform">arrow_right_alt</span>
+</a>
+<button class="text-orange-200 hover:text-sunset-orange transition-colors">
+<span class="material-symbols-outlined text-2xl">bookmark</span>
+</button>
+</div>
+</div>
+</article>
+<article class="break-inside-avoid bg-white border border-orange-100/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-orange-900/5 transition-all group flex flex-col">
+<div class="relative aspect-video overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC1wY0xU7nz5bclPnahXHTA2CQsfrakpIAX06Rq5sjh1QU0gZ9USrxLv-9PhXL6oZINOI_IjL2JG_L6qrb497b_4uTkIsfvsgUrvGct6ZURUV4WyzVi6vE1TNTHwY6ZJQ1aoGv6H2qx4iti0JF4rZ5cIEpQCJWjSZ-az-ZEbgLi8Qtum7aUL5QzosV1I0ZmLucaMrwP1pwC7KJbz0LUKdlfdKZeJph7XPDUDsQtuWHgIhzQC3QV6Tgnd_rZq59-1d6AyA9fXfEXCFnV')"></div>
+<div class="absolute top-4 left-4 bg-orange-950/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-black text-white uppercase tracking-[0.15em]">Economy</div>
+</div>
+<div class="p-6 flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-bold text-orange-400 uppercase tracking-wider">3h ago • Financial Sands</span>
+</div>
+<h2 class="text-xl font-bold leading-tight text-orange-950 group-hover:text-sunset-orange transition-colors">Market Resilience in 2024: Steady Growth</h2>
+<p class="text-sm text-orange-900/70 leading-relaxed line-clamp-3">Despite geopolitical volatility, global markets are showing signs of stabilization as core inflation figures drop below 2.5% in major economies...</p>
+<div class="mt-2 pt-5 border-t border-orange-50 flex items-center justify-between">
+<a class="text-sm font-extrabold text-sunset-orange flex items-center gap-2 group/link" href="#">
+                                Read Story
+                                <span class="material-symbols-outlined text-lg group-hover/link:translate-x-1 transition-transform">arrow_right_alt</span>
+</a>
+<button class="text-orange-200 hover:text-sunset-orange transition-colors">
+<span class="material-symbols-outlined text-2xl">bookmark</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+<div class="mt-16 pb-24 flex justify-center">
+<button class="flex items-center gap-3 px-8 py-3 rounded-xl bg-white border border-orange-100 text-sm font-bold text-orange-950 hover:bg-orange-50 transition-all shadow-sm">
+<span class="material-symbols-outlined text-lg">explore</span>
+                    Wander further
+                </button>
+</div>
+</main>
+</div>
+<div class="fixed bottom-0 left-0 right-0 h-32 pointer-events-none z-40 flex items-end overflow-hidden bottom-banner">
+<svg class="absolute bottom-0 w-full h-full preserve-aspect-ratio" viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
+<path class="dune-svg" d="M0,120 L1440,120 L1440,60 C1200,40 1000,100 720,80 C440,60 240,10 0,40 Z" opacity="0.4"></path>
+<path class="dune-svg" d="M0,120 L1440,120 L1440,80 C1100,60 900,110 600,90 C300,70 150,40 0,70 Z"></path>
+<g class="caravan-svg" transform="translate(100, 65) scale(0.6)">
+<path d="M10,20 Q15,0 25,10 T40,20 L45,35 L5,35 Z"></path>
+<path d="M60,20 Q65,0 75,10 T90,20 L95,35 L55,35 Z"></path>
+<path d="M110,20 Q115,0 125,10 T140,20 L145,35 L105,35 Z"></path>
+<circle cx="27" cy="8" r="3"></circle>
+</g>
+<g class="caravan-svg" transform="translate(1100, 75) scale(0.45)">
+<path d="M10,20 Q15,0 25,10 T40,20 L45,35 L5,35 Z"></path>
+<path d="M60,20 Q65,0 75,10 T90,20 L95,35 L55,35 Z"></path>
+</g>
+</svg>
+</div>
+
+</body></html>

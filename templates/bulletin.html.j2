@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>News Bulletin - Sand Edition</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          "sunset-orange": "#fb923c",
+          "sunset-rose": "#f43f5e",
+          "sand-light": "#fdf8f1",
+          "sand-sidebar": "#f8f0e3",
+          "desert-dusk": "#431407",
+        },
+        fontFamily: { "sans": ["'Plus Jakarta Sans'", "sans-serif"] },
+        borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<style type="text/tailwindcss">
+  :root { --real-sunset: linear-gradient(to bottom right, #ffffff, #fffaf5, #fff4e6); --dune-color: #f1e4d1; }
+  body { background: var(--real-sunset); background-attachment: fixed; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+  .desert-watermark {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 80%; height: 80%;
+    background-image: radial-gradient(circle at 50% 30%, #fff7ed 0%, transparent 60%),
+                      radial-gradient(ellipse at 50% 100%, #fdf2e9 0%, transparent 70%);
+    z-index: -1; opacity: 0.6; pointer-events: none;
+  }
+  .dune-svg { fill: #f5e6d3; }
+  .caravan-svg { fill: #7c2d12; opacity: 0.25; }
+  .bottom-banner { background: linear-gradient(to top, #f5e6d3 0%, transparent 100%); }
+  .hidden-item { display: none; }
+</style>
+</head>
+<body class="text-orange-950 min-h-screen relative pb-32">
+<div class="desert-watermark"></div>
+
+<!-- Header -->
+<header class="sticky top-0 z-50 w-full border-b border-orange-100 bg-white/70 backdrop-blur-xl">
+  <div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-3">
+        <div class="bg-gradient-to-br from-sunset-orange to-sunset-rose p-2 rounded-xl text-white shadow-lg shadow-orange-200">
+          <span class="material-symbols-outlined block text-xl">landscape</span>
+        </div>
+        <div>
+          <h1 class="text-lg font-extrabold leading-tight text-orange-950 tracking-tight">News Bulletin</h1>
+          <p class="text-[10px] uppercase tracking-widest text-orange-500 font-bold">Sand Edition — {{ date }}</p>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-1 text-orange-300">
+        <span class="text-xs font-semibold uppercase tracking-wider">The ToolShed</span>
+        <span class="material-symbols-outlined text-sm">chevron_right</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-orange-900">Oasis Reader</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 flex-1 justify-end max-w-xl">
+      <div class="relative w-full max-w-xs group">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-orange-400 group-focus-within:text-sunset-orange transition-colors">search</span>
+        <input id="search-input" class="w-full bg-orange-50/50 border-orange-100 border rounded-xl pl-10 pr-4 h-10 text-sm focus:ring-2 focus:ring-sunset-orange/20 focus:border-sunset-orange transition-all placeholder:text-orange-300" placeholder="Sift through the sands..." type="text"/>
+      </div>
+      <button class="flex items-center gap-2 bg-orange-950 hover:bg-black text-white px-5 h-10 rounded-xl text-sm font-bold transition-all shadow-md shadow-orange-900/10 shrink-0">
+        <span class="material-symbols-outlined text-lg">dashboard</span>
+        <span class="hidden sm:inline">Home</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="max-w-[1440px] mx-auto flex">
+  <!-- Sidebar -->
+  <aside class="w-64 shrink-0 hidden lg:block sticky top-16 h-[calc(100vh-64px)] overflow-y-auto bg-sand-sidebar/30 border-r border-orange-50 p-6 custom-scrollbar">
+    <div class="space-y-8">
+      <div class="space-y-4">
+        <h3 class="text-[11px] font-black uppercase tracking-[0.2em] text-orange-400 px-3">Sources</h3>
+        <nav class="space-y-1" id="source-nav">
+          <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white text-sunset-orange font-bold shadow-sm border border-orange-100 cursor-pointer source-link" data-source="all">
+            <span class="material-symbols-outlined">explore</span>
+            <span class="text-sm">All Sources</span>
+          </a>
+          <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/60 transition-all text-orange-800/70 hover:text-orange-950 font-medium cursor-pointer source-link" data-source="hackernews">
+            <span class="material-symbols-outlined">code</span>
+            <span class="text-sm">HackerNews</span>
+          </a>
+          <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/60 transition-all text-orange-800/70 hover:text-orange-950 font-medium cursor-pointer source-link" data-source="reddit">
+            <span class="material-symbols-outlined">forum</span>
+            <span class="text-sm">Reddit</span>
+          </a>
+          <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/60 transition-all text-orange-800/70 hover:text-orange-950 font-medium cursor-pointer source-link" data-source="tldr">
+            <span class="material-symbols-outlined">newspaper</span>
+            <span class="text-sm">TLDR AI</span>
+          </a>
+          <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/60 transition-all text-orange-800/70 hover:text-orange-950 font-medium cursor-pointer source-link" data-source="papers">
+            <span class="material-symbols-outlined">science</span>
+            <span class="text-sm">HF Papers</span>
+          </a>
+        </nav>
+      </div>
+      <div class="space-y-2 px-3 text-xs text-orange-400">
+        <p class="font-semibold uppercase tracking-wider">Generated</p>
+        <p>{{ generated_at }}</p>
+        <p>{{ items | length }} articles</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 p-6 lg:p-10">
+    <!-- Filter buttons -->
+    <div class="flex gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide">
+      <button class="filter-btn px-6 py-2 rounded-full bg-orange-950 text-white text-xs font-bold uppercase tracking-widest shadow-lg shadow-orange-900/20 border-none shrink-0 active" data-filter="newest">Fresh Winds</button>
+      <button class="filter-btn px-6 py-2 rounded-full bg-white border border-orange-100 text-orange-600 text-xs font-bold uppercase tracking-widest hover:bg-orange-50 transition-colors shrink-0" data-filter="top">Rising Sun</button>
+    </div>
+
+    <!-- Article grid -->
+    <div class="columns-1 md:columns-2 xl:columns-3 gap-8 space-y-8" id="articles-grid">
+      {% for item in items %}
+      <article class="article-card break-inside-avoid bg-white border border-orange-100/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-orange-900/5 transition-all group flex flex-col"
+               data-source="{{ item.source }}"
+               data-timestamp="{{ item.timestamp }}"
+               data-score="{{ item.score }}">
+        <div class="p-6 flex flex-col gap-4">
+          <div class="flex items-center gap-2">
+            <span class="inline-block bg-orange-950/80 px-3 py-1 rounded-lg text-[10px] font-black text-white uppercase tracking-[0.15em]">{{ item.category }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-bold text-orange-400 uppercase tracking-wider">
+              {{ item.timestamp[:10] }} • {{ item.source }}
+              {% if item.score %} • ▲ {{ item.score }}{% endif %}
+            </span>
+          </div>
+          <h2 class="text-xl font-bold leading-tight text-orange-950 group-hover:text-sunset-orange transition-colors">{{ item.title }}</h2>
+          {% if item.summary %}
+          <p class="text-sm text-orange-900/70 leading-relaxed line-clamp-4">{{ item.summary }}</p>
+          {% endif %}
+          <div class="mt-2 pt-5 border-t border-orange-50 flex items-center justify-between">
+            <a class="text-sm font-extrabold text-sunset-orange flex items-center gap-2 group/link" href="{{ item.url | safe_url }}" target="_blank" rel="noopener">
+              Read Story
+              <span class="material-symbols-outlined text-lg group-hover/link:translate-x-1 transition-transform">arrow_right_alt</span>
+            </a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+
+      {% if not items %}
+      <div class="col-span-3 text-center py-24 text-orange-300">
+        <span class="material-symbols-outlined text-6xl block mb-4">hourglass_empty</span>
+        <p class="text-lg font-semibold">No articles yet. Run the pipeline to fetch today's bulletin.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="mt-16 pb-24 flex justify-center">
+      <p class="text-sm text-orange-300">{{ items | length }} articles • {{ date }}</p>
+    </div>
+  </main>
+</div>
+
+<!-- Bottom dune banner -->
+<div class="fixed bottom-0 left-0 right-0 h-32 pointer-events-none z-40 flex items-end overflow-hidden bottom-banner">
+  <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
+    <path class="dune-svg" d="M0,120 L1440,120 L1440,60 C1200,40 1000,100 720,80 C440,60 240,10 0,40 Z" opacity="0.4"></path>
+    <path class="dune-svg" d="M0,120 L1440,120 L1440,80 C1100,60 900,110 600,90 C300,70 150,40 0,70 Z"></path>
+    <g class="caravan-svg" transform="translate(100, 65) scale(0.6)">
+      <path d="M10,20 Q15,0 25,10 T40,20 L45,35 L5,35 Z"></path>
+      <path d="M60,20 Q65,0 75,10 T90,20 L95,35 L55,35 Z"></path>
+      <path d="M110,20 Q115,0 125,10 T140,20 L145,35 L105,35 Z"></path>
+      <circle cx="27" cy="8" r="3"></circle>
+    </g>
+    <g class="caravan-svg" transform="translate(1100, 75) scale(0.45)">
+      <path d="M10,20 Q15,0 25,10 T40,20 L45,35 L5,35 Z"></path>
+      <path d="M60,20 Q65,0 75,10 T90,20 L95,35 L55,35 Z"></path>
+    </g>
+  </svg>
+</div>
+
+<script>
+  // Source filter
+  document.querySelectorAll('.source-link').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelectorAll('.source-link').forEach(l => {
+        l.classList.remove('bg-white', 'text-sunset-orange', 'font-bold', 'shadow-sm', 'border', 'border-orange-100');
+        l.classList.add('text-orange-800/70', 'hover:bg-white/60');
+      });
+      link.classList.add('bg-white', 'text-sunset-orange', 'font-bold', 'shadow-sm', 'border', 'border-orange-100');
+      link.classList.remove('text-orange-800/70');
+
+      const src = link.dataset.source;
+      document.querySelectorAll('.article-card').forEach(card => {
+        card.style.display = (src === 'all' || card.dataset.source === src) ? '' : 'none';
+      });
+    });
+  });
+
+  // Sort filter
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.remove('bg-orange-950', 'text-white');
+        b.classList.add('bg-white', 'text-orange-600');
+      });
+      btn.classList.add('bg-orange-950', 'text-white');
+      btn.classList.remove('bg-white', 'text-orange-600');
+
+      const filter = btn.dataset.filter;
+      const grid = document.getElementById('articles-grid');
+      const cards = Array.from(grid.querySelectorAll('.article-card'));
+
+      cards.sort((a, b) => {
+        if (filter === 'newest') {
+          return new Date(b.dataset.timestamp) - new Date(a.dataset.timestamp);
+        } else if (filter === 'top') {
+          return parseInt(b.dataset.score) - parseInt(a.dataset.score);
+        }
+        return 0;
+      });
+
+      cards.forEach(card => grid.appendChild(card));
+    });
+  });
+
+  // Search
+  document.getElementById('search-input').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.article-card').forEach(card => {
+      const text = card.innerText.toLowerCase();
+      card.style.display = (!q || text.includes(q)) ? '' : 'none';
+    });
+  });
+</script>
+</body>
+</html>
