@@ -141,7 +141,7 @@
               {% if item.score %} • ▲ {{ item.score }}{% endif %}
             </span>
           </div>
-          <h2 class="text-xl font-bold leading-tight text-orange-950 group-hover:text-sunset-orange transition-colors">{{ item.title }}</h2>
+          <h2 class="text-xl font-bold leading-tight text-orange-950 group-hover:text-sunset-orange transition-colors"><a href="{{ item.url | safe_url }}" target="_blank" rel="noopener">{{ item.title }}</a></h2>
           {% if item.summary %}
           <p class="text-sm text-orange-900/70 leading-relaxed line-clamp-4">{{ item.summary }}</p>
           {% endif %}
