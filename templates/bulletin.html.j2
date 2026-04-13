@@ -108,6 +108,19 @@
           </a>
         </nav>
       </div>
+      {% if archive_dates %}
+      <div class="space-y-4">
+        <h3 class="text-[11px] font-black uppercase tracking-[0.2em] text-orange-400 px-3">Archive</h3>
+        <nav class="space-y-1">
+          {% for d in archive_dates %}
+          <a href="{{ d }}.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/60 transition-all text-orange-800/70 hover:text-orange-950 font-medium {% if d == current_date %}bg-white text-sunset-orange font-bold shadow-sm border border-orange-100{% endif %}">
+            <span class="material-symbols-outlined text-sm">calendar_today</span>
+            <span class="text-sm">{{ d }}</span>
+          </a>
+          {% endfor %}
+        </nav>
+      </div>
+      {% endif %}
       <div class="space-y-2 px-3 text-xs text-orange-400">
         <p class="font-semibold uppercase tracking-wider">Generated</p>
         <p>{{ generated_at }}</p>

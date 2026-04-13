@@ -4,6 +4,7 @@ Run with: python -m src.graph
 """
 
 import asyncio
+from pathlib import Path
 from typing import TypedDict
 from langgraph.graph import StateGraph, END
 
@@ -13,7 +14,7 @@ from src.scrapers.reddit import scrape_reddit
 from src.scrapers.tldr import scrape_tldr
 from src.scrapers.papers import scrape_huggingface_papers
 from src.summarizer import summarize_items
-from src.storage import save_bulletin, load_bulletin
+from src.storage import save_bulletin, load_bulletin, list_bulletin_dates
 from src.renderer import render_bulletin
 
 
@@ -95,9 +96,21 @@ def storage_node(state: PipelineState) -> PipelineState:
 def renderer_node(state: PipelineState) -> PipelineState:
     storage_cfg = state["config"]["storage"]
     output_cfg = state["config"]["output"]
-    bulletin = load_bulletin(storage_cfg["data_dir"])
-    html_path = render_bulletin(bulletin, output_cfg["html_path"])
+    data_dir = storage_cfg["data_dir"]
+    archive_dates = list_bulletin_dates(data_dir)
+
+    # Render today's bulletin (main page)
+    bulletin = load_bulletin(data_dir)
+    html_path = render_bulletin(bulletin, output_cfg["html_path"], archive_dates)
     print(f"[renderer] HTML written to {html_path}")
+
+    # Render each archive date to its own HTML file
+    out_dir = Path(output_cfg["html_path"]).parent
+    for d in archive_dates:
+        archived = load_bulletin(data_dir, d)
+        archive_path = out_dir / f"{d}.html"
+        render_bulletin(archived, str(archive_path), archive_dates)
+
     return {**state, "html_path": str(html_path)}
 
 

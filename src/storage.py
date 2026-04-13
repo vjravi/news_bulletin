@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 
-def save_bulletin(items: list[dict], data_dir: str, retention_days: int = 7) -> Path:
+def save_bulletin(items: list[dict], data_dir: str, retention_days: int = 30) -> Path:
     today = date.today().isoformat()
     bulletins_dir = Path(data_dir) / "bulletins"
     bulletins_dir.mkdir(parents=True, exist_ok=True)
@@ -18,6 +18,20 @@ def save_bulletin(items: list[dict], data_dir: str, retention_days: int = 7) -> 
 
     _cleanup_old(bulletins_dir, retention_days)
     return path
+
+
+def list_bulletin_dates(data_dir: str) -> list[str]:
+    bulletins_dir = Path(data_dir) / "bulletins"
+    if not bulletins_dir.exists():
+        return []
+    dates = []
+    for f in sorted(bulletins_dir.glob("*.json"), reverse=True):
+        try:
+            date.fromisoformat(f.stem)
+            dates.append(f.stem)
+        except ValueError:
+            continue
+    return dates
 
 
 def load_bulletin(data_dir: str, target_date: str = None) -> dict:
