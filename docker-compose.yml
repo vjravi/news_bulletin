@@ -1,7 +1,9 @@
 services:
-  pipeline:
+  api:
     build: .
-    container_name: news_pipeline
+    container_name: news_api
+    ports:
+      - "8010:8010"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -10,5 +12,3 @@ services:
       - ./data:/app/data
       - ./output:/app/output
       - ./config.yaml:/app/config.yaml
-    profiles:
-      - run

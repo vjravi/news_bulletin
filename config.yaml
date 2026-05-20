@@ -1,5 +1,5 @@
 ollama:
-  model: "qwen3:8b"
+  model: "qwen3.5:9b-mlx-bf16"
   base_url: "http://localhost:11434"
 
 sources:
@@ -23,3 +23,13 @@ storage:
 
 output:
   html_path: "./output/bulletin.html"
+
+scheduler:
+  enabled: true
+  daily_at: "07:00"
+  timezone: "America/Los_Angeles"
+
+recommender:
+  enabled: true
+  max_concurrent: 3
+  score_model: null   # null => reuse ollama.model

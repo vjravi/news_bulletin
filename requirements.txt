@@ -4,5 +4,7 @@ httpx
 beautifulsoup4
 jinja2
 pyyaml
-fastapi
-uvicorn
+fastapi>=0.110,<0.120
+starlette>=0.36.3,<0.38.0
+uvicorn[standard]>=0.27
+apscheduler>=3.10
