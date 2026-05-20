@@ -1,10 +1,10 @@
 """
-LangGraph pipeline: scrape -> summarize -> store -> render
+LangGraph pipeline: scrape -> summarize -> store -> refresh_profile -> score_items
 Run with: python -m src.graph
 """
 
 import asyncio
-from pathlib import Path
+from datetime import date
 from typing import TypedDict
 from langgraph.graph import StateGraph, END
 
@@ -14,8 +14,8 @@ from src.scrapers.reddit import scrape_reddit
 from src.scrapers.tldr import scrape_tldr
 from src.scrapers.papers import scrape_huggingface_papers
 from src.summarizer import summarize_items
-from src.storage import save_bulletin, load_bulletin, list_bulletin_dates
-from src.renderer import render_bulletin
+from src.storage import save_bulletin, load_bulletin, list_bulletin_dates, update_bulletin_scores
+from src.preferences import load_preferences, load_profile
 
 
 class PipelineState(TypedDict):
@@ -23,7 +23,6 @@ class PipelineState(TypedDict):
     raw_items: list[dict]
     summarized_items: list[dict]
     bulletin_path: str
-    html_path: str
 
 
 # ── Node: scrape all sources in parallel ────────────────────────────────────
@@ -91,27 +90,47 @@ def storage_node(state: PipelineState) -> PipelineState:
     return {**state, "bulletin_path": str(path)}
 
 
-# ── Node: render ─────────────────────────────────────────────────────────────
+# ── Node: refresh user profile ───────────────────────────────────────────────
 
-def renderer_node(state: PipelineState) -> PipelineState:
-    storage_cfg = state["config"]["storage"]
-    output_cfg = state["config"]["output"]
-    data_dir = storage_cfg["data_dir"]
-    archive_dates = list_bulletin_dates(data_dir)
+async def refresh_profile_node(state: PipelineState) -> PipelineState:
+    data_dir = state["config"]["storage"]["data_dir"]
+    prefs = load_preferences(data_dir)
+    if not prefs.get("votes"):
+        print("[recommender] No votes yet, skipping profile refresh")
+        return state
 
-    # Render today's bulletin (main page)
-    bulletin = load_bulletin(data_dir)
-    html_path = render_bulletin(bulletin, output_cfg["html_path"], archive_dates)
-    print(f"[renderer] HTML written to {html_path}")
+    print("[recommender] Refreshing user profile...")
+    from src.recommender import refresh_profile
+    await refresh_profile(state["config"])
+    print("[recommender] Profile updated")
+    return state
 
-    # Render each archive date to its own HTML file
-    out_dir = Path(output_cfg["html_path"]).parent
-    for d in archive_dates:
-        archived = load_bulletin(data_dir, d)
-        archive_path = out_dir / f"{d}.html"
-        render_bulletin(archived, str(archive_path), archive_dates)
 
-    return {**state, "html_path": str(html_path)}
+# ── Node: score items ────────────────────────────────────────────────────────
+
+async def score_items_node(state: PipelineState) -> PipelineState:
+    cfg = state["config"]
+    if not cfg.get("recommender", {}).get("enabled", True):
+        return state
+
+    data_dir = cfg["storage"]["data_dir"]
+    profile = load_profile(data_dir)
+    if not profile.get("summary"):
+        print("[recommender] No profile yet, skipping scoring")
+        return state
+
+    today = date.today().isoformat()
+    bulletin = load_bulletin(data_dir, today)
+    items = bulletin.get("items", [])
+    if not items:
+        return state
+
+    print(f"[recommender] Scoring {len(items)} items...")
+    from src.recommender import score_items
+    scores = await score_items(items, profile["summary"], cfg)
+    update_bulletin_scores(data_dir, today, scores)
+    print("[recommender] Scoring complete")
+    return state
 
 
 # ── Build graph ───────────────────────────────────────────────────────────────
@@ -121,30 +140,25 @@ def build_graph():
     g.add_node("scrape", scrape_node)
     g.add_node("summarize", summarize_node)
     g.add_node("storage", storage_node)
-    g.add_node("renderer", renderer_node)
+    g.add_node("refresh_profile", refresh_profile_node)
+    g.add_node("score_items", score_items_node)
 
     g.set_entry_point("scrape")
     g.add_edge("scrape", "summarize")
     g.add_edge("summarize", "storage")
-    g.add_edge("storage", "renderer")
-    g.add_edge("renderer", END)
+    g.add_edge("storage", "refresh_profile")
+    g.add_edge("refresh_profile", "score_items")
+    g.add_edge("score_items", END)
 
     return g.compile()
 
 
 def run():
-    config = load_config()
-    graph = build_graph()
-    initial_state: PipelineState = {
-        "config": config,
-        "raw_items": [],
-        "summarized_items": [],
-        "bulletin_path": "",
-        "html_path": "",
-    }
-    final = asyncio.run(graph.ainvoke(initial_state))
-    print(f"\nDone! Open {final['html_path']} in your browser.")
-    return final
+    from src.pipeline import try_run_pipeline
+    import asyncio
+    result = asyncio.run(try_run_pipeline())
+    print("\nDone!")
+    return result
 
 
 if __name__ == "__main__":
