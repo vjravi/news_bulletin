@@ -8,6 +8,10 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      # To use a cloud LLM provider instead of Ollama, set llm.model in config.yaml
+      # (e.g. anthropic/claude-opus-4-8 or openai/gpt-4.1) and pass the matching key:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - ./data:/app/data
       - ./output:/app/output

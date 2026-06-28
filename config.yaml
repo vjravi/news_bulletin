@@ -1,6 +1,16 @@
-ollama:
-  model: "qwen3.5:9b-mlx-bf16"
-  base_url: "http://localhost:11434"
+llm:
+  # Provider-agnostic via LiteLLM. The provider is encoded in the model string.
+  #   Ollama (local):  "ollama/qwen3:30b-a3b"   (set api_base to your Ollama server)
+  #   Anthropic:       "anthropic/claude-sonnet-4-6"   (set ANTHROPIC_API_KEY env var)
+  #   OpenAI:          "openai/gpt-4.1"               (set OPENAI_API_KEY env var)
+  model: "ollama/qwen3:8b"
+  # Models offered in the UI dropdown. The selected model applies to that refresh run only.
+  models:
+    - "ollama/qwen3:8b"
+    - "openai/gpt-4.1"
+    - "openai/gpt-4o-mini"
+    - "anthropic/claude-sonnet-4-6"
+  api_base: "http://localhost:11434"   # used by Ollama; ignored/null for cloud providers
 
 sources:
   hackernews:

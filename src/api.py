@@ -83,6 +83,13 @@ async def get_bulletin(date: str):
     return {**bulletin, "items": items}
 
 
+@app.get("/api/models")
+async def get_models():
+    llm = config["llm"]
+    models = llm.get("models") or [llm["model"]]
+    return {"models": models, "current": llm["model"]}
+
+
 @app.get("/api/preferences")
 async def get_preferences():
     data_dir = config["storage"]["data_dir"]
@@ -117,15 +124,38 @@ async def get_profile():
     return load_profile(data_dir)
 
 
+@app.get("/api/status")
+async def status():
+    from src.pipeline import _lock
+    return {"running": _lock.locked()}
+
+
+@app.get("/api/progress")
+async def get_progress():
+    from src.summarizer import progress
+    return progress
+
+
+class RefreshRequest(BaseModel):
+    model: str = None
+
+
 @app.post("/api/refresh", status_code=202)
-async def refresh(background_tasks: BackgroundTasks):
-    from src.pipeline import _lock, run_pipeline
+async def refresh(background_tasks: BackgroundTasks, body: RefreshRequest = RefreshRequest()):
+    from src.pipeline import _lock
     if _lock.locked():
         raise HTTPException(status_code=409, detail="Pipeline already running")
-    background_tasks.add_task(_run_with_lock)
+
+    model = body.model
+    if model:
+        allowed = config["llm"].get("models") or [config["llm"]["model"]]
+        if model not in allowed:
+            raise HTTPException(status_code=422, detail=f"Unknown model: {model}")
+
+    background_tasks.add_task(_run_with_lock, model)
     return {"started": True}
 
 
-async def _run_with_lock():
+async def _run_with_lock(model: str = None):
     from src.pipeline import try_run_pipeline
-    await try_run_pipeline(config)
+    await try_run_pipeline(config, model)

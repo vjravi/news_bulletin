@@ -47,6 +47,7 @@ async function init() {
   wireFilterButtons();
   wireSearch();
   wireRefreshButton();
+  loadModels();
 
   if (target) {
     await loadBulletin(target);
@@ -366,25 +367,156 @@ function wireSearch() {
   });
 }
 
+function renderSkeletonCards(n = 6) {
+  const grid = document.getElementById("articles-grid");
+  grid.innerHTML = Array.from({ length: n }, () => `
+    <article class="break-inside-avoid mb-8 bg-white border border-orange-100/50 rounded-2xl overflow-hidden shadow-sm flex flex-col animate-pulse">
+      <div class="p-6 flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <div class="h-4 w-20 bg-orange-100 rounded-lg"></div>
+          <div class="h-4 w-8 bg-orange-50 rounded"></div>
+        </div>
+        <div class="h-3 w-32 bg-orange-50 rounded"></div>
+        <div class="h-6 w-full bg-orange-100 rounded-lg"></div>
+        <div class="space-y-2">
+          <div class="h-3 w-full bg-orange-50 rounded"></div>
+          <div class="h-3 w-5/6 bg-orange-50 rounded"></div>
+          <div class="h-3 w-4/6 bg-orange-50 rounded"></div>
+        </div>
+        <div class="mt-2 pt-5 border-t border-orange-50 flex items-center justify-between">
+          <div class="h-4 w-20 bg-orange-100 rounded"></div>
+          <div class="flex gap-1">
+            <div class="h-6 w-6 bg-orange-50 rounded"></div>
+            <div class="h-6 w-6 bg-orange-50 rounded"></div>
+          </div>
+        </div>
+      </div>
+    </article>`).join("");
+  document.getElementById("articles-count").textContent = "Scraping and ranking…";
+}
+
+async function loadModels() {
+  const sel = document.getElementById("model-select");
+  if (!sel) return;
+  try {
+    const res = await fetch("/api/models");
+    const { models, current } = await res.json();
+    sel.innerHTML = (models || []).map(m =>
+      `<option value="${escHtml(m)}" ${m === current ? "selected" : ""}>${escHtml(m)}</option>`
+    ).join("");
+  } catch {
+    // Leave dropdown empty on failure; refresh will fall back to config default.
+  }
+}
+
 function wireRefreshButton() {
   document.getElementById("refresh-btn").addEventListener("click", async () => {
     const btn = document.getElementById("refresh-btn");
-    btn.disabled = true;
-    btn.querySelector("span.material-symbols-outlined").textContent = "hourglass_empty";
-    try {
-      const res = await fetch("/api/refresh", { method: "POST" });
-      if (res.status === 409) {
-        alert("Pipeline is already running.");
-      } else if (res.ok) {
-        alert("Refresh started! Check back in a few minutes.");
-      } else {
-        alert("Failed to start refresh.");
-      }
-    } finally {
-      btn.disabled = false;
-      btn.querySelector("span.material-symbols-outlined").textContent = "refresh";
+    const icon = btn.querySelector("span.material-symbols-outlined");
+
+    // Check if already running before posting
+    const statusRes = await fetch("/api/status");
+    const { running } = await statusRes.json();
+    if (running) {
+      // Pipeline is already running — show skeletons and wait for it
+      renderSkeletonCards();
+      icon.textContent = "hourglass_empty";
+      btn.disabled = true;
+      pollUntilDone(btn, icon);
+      return;
     }
+
+    const model = document.getElementById("model-select")?.value || null;
+    const res = await fetch("/api/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model }),
+    });
+    if (!res.ok) {
+      alert("Failed to start refresh.");
+      return;
+    }
+
+    renderSkeletonCards();
+    icon.textContent = "hourglass_empty";
+    btn.disabled = true;
+    pollUntilDone(btn, icon);
   });
+}
+
+function showProgressBar() {
+  let bar = document.getElementById("summarize-progress");
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "summarize-progress";
+    bar.className = "fixed top-16 left-0 right-0 z-50 px-0";
+    bar.innerHTML = `
+      <div class="h-1 bg-orange-100">
+        <div id="summarize-progress-fill" class="h-1 bg-sunset-orange transition-all duration-500" style="width:0%"></div>
+      </div>
+      <div id="summarize-progress-label" class="text-center text-xs text-orange-400 py-1 bg-white/80 backdrop-blur">
+        Summarizing…
+      </div>`;
+    document.body.appendChild(bar);
+  }
+  return bar;
+}
+
+function hideProgressBar() {
+  document.getElementById("summarize-progress")?.remove();
+}
+
+async function pollUntilDone(btn, icon) {
+  // Wait briefly so the lock has time to be acquired
+  await new Promise(r => setTimeout(r, 1000));
+
+  const bar = showProgressBar();
+  const fill = bar.querySelector("#summarize-progress-fill");
+  const label = bar.querySelector("#summarize-progress-label");
+
+  while (true) {
+    await new Promise(r => setTimeout(r, 2000));
+    try {
+      const [statusRes, progressRes] = await Promise.all([
+        fetch("/api/status"),
+        fetch("/api/progress"),
+      ]);
+      const { running } = await statusRes.json();
+      const { done, total } = await progressRes.json();
+
+      if (total > 0) {
+        const pct = Math.round((done / total) * 100);
+        fill.style.width = `${pct}%`;
+        label.textContent = `Summarizing ${done} / ${total} articles…`;
+      }
+
+      if (!running) break;
+    } catch {
+      // Network hiccup — keep polling
+    }
+  }
+
+  fill.style.width = "100%";
+  label.textContent = "Done!";
+  await new Promise(r => setTimeout(r, 600));
+  hideProgressBar();
+
+  // Pipeline done — reload today's bulletin
+  const today = new Date().toISOString().slice(0, 10);
+  const datesRes = await fetch("/api/bulletins/dates");
+  const { dates } = await datesRes.json();
+  state.availableDates = dates;
+  renderCalendar();
+
+  const dateToLoad = dates.includes(today) ? today : dates[0];
+  if (dateToLoad) {
+    await loadBulletin(dateToLoad);
+  } else {
+    renderEmpty("No bulletins found after refresh.");
+  }
+
+  btn.disabled = false;
+  icon.textContent = "refresh";
 }
 
 // ── Utilities ─────────────────────────────────────────────────────────────────

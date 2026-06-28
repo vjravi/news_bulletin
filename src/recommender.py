@@ -3,26 +3,15 @@ import json
 import re
 from datetime import datetime
 
-import httpx
-
+from src.llm import acomplete
 from src.preferences import load_preferences, load_profile, save_profile
 from src.storage import find_items_by_ids, load_bulletin, list_bulletin_dates
 
 
-async def _ollama_generate(prompt: str, model: str, base_url: str) -> str:
-    async with httpx.AsyncClient(timeout=60) as client:
-        resp = await client.post(
-            f"{base_url}/api/generate",
-            json={"model": model, "prompt": prompt, "stream": False},
-        )
-        resp.raise_for_status()
-        return resp.json().get("response", "").strip()
-
-
 async def refresh_profile(config: dict):
     data_dir = config["storage"]["data_dir"]
-    model = config.get("recommender", {}).get("score_model") or config["ollama"]["model"]
-    base_url = config["ollama"]["base_url"]
+    model = config.get("recommender", {}).get("score_model") or config["llm"]["model"]
+    api_base = config["llm"].get("api_base")
 
     prefs = load_preferences(data_dir)
     votes = prefs.get("votes", {})
@@ -50,14 +39,14 @@ async def refresh_profile(config: dict):
     )
 
     try:
-        summary = await _ollama_generate(prompt, model, base_url)
+        summary = await acomplete(prompt, model, api_base)
         if summary:
             save_profile(data_dir, summary, list(votes.keys()), model)
     except Exception as e:
         print(f"[recommender] Warning: failed to refresh profile: {e}")
 
 
-async def _score_item(item: dict, profile: str, model: str, base_url: str, sem: asyncio.Semaphore) -> dict:
+async def _score_item(item: dict, profile: str, model: str, api_base: str, sem: asyncio.Semaphore) -> dict:
     prompt = (
         f"User profile: {profile}\n\n"
         f"Article title: {item['title']}\n"
@@ -67,7 +56,7 @@ async def _score_item(item: dict, profile: str, model: str, base_url: str, sem: 
 
     async with sem:
         try:
-            text = await _ollama_generate(prompt, model, base_url)
+            text = await acomplete(prompt, model, api_base)
             match = re.search(r"\{.*?\}", text, re.DOTALL)
             if match:
                 data = json.loads(match.group())
@@ -88,13 +77,13 @@ async def _score_item(item: dict, profile: str, model: str, base_url: str, sem: 
 
 
 async def score_items(items: list[dict], profile: str, config: dict) -> dict:
-    model = config.get("recommender", {}).get("score_model") or config["ollama"]["model"]
-    base_url = config["ollama"]["base_url"]
+    model = config.get("recommender", {}).get("score_model") or config["llm"]["model"]
+    api_base = config["llm"].get("api_base")
     max_concurrent = config.get("recommender", {}).get("max_concurrent", 3)
     sem = asyncio.Semaphore(max_concurrent)
 
     results = await asyncio.gather(*[
-        _score_item(item, profile, model, base_url, sem) for item in items
+        _score_item(item, profile, model, api_base, sem) for item in items
     ])
 
     return {r["item_id"]: r for r in results}

@@ -67,12 +67,12 @@ async def scrape_node(state: PipelineState) -> PipelineState:
 # ── Node: summarize ──────────────────────────────────────────────────────────
 
 async def summarize_node(state: PipelineState) -> PipelineState:
-    cfg = state["config"]["ollama"]
+    cfg = state["config"]["llm"]
     model = cfg["model"]
-    base_url = cfg["base_url"]
+    api_base = cfg.get("api_base")
     items = state["raw_items"]
     print(f"[summarize] Summarizing {len(items)} items with {model}...")
-    summarized = await summarize_items(items, model, base_url)
+    summarized = await summarize_items(items, model, api_base)
     print("[summarize] Done")
     return {**state, "summarized_items": summarized}
 

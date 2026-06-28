@@ -2,7 +2,9 @@
 
 Aggregates AI/ML news from HackerNews, Reddit (r/LocalLLaMA), TLDR AI, and HuggingFace Papers, summarizes each item with a local LLM, and serves a personalized reading bulletin via FastAPI.
 
-**Pipeline:** scrape (parallel) → summarize via Ollama → store JSON → refresh user profile → score items by relevance
+**Pipeline:** scrape (parallel) → summarize via an LLM → store JSON → refresh user profile → score items by relevance
+
+The LLM layer is wrapped with [LiteLLM](https://docs.litellm.ai), so the summarizer and recommender are model-agnostic — run a local model through Ollama, or point at Anthropic Claude or OpenAI by changing one config line (see [Configuration](#configuration)).
 
 **Serve:** FastAPI + vanilla JS frontend with a calendar archive and like/dislike voting
 
@@ -13,11 +15,13 @@ Aggregates AI/ML news from HackerNews, Reddit (r/LocalLLaMA), TLDR AI, and Huggi
 ### Prerequisites
 
 - Python 3.11+
-- [Ollama](https://ollama.com) running locally with the model pulled
+- An LLM backend. By default this is [Ollama](https://ollama.com) running locally with the model pulled:
 
 ```bash
-ollama pull qwen3.5:9b-mlx-bf16
+ollama pull qwen3:30b-a3b
 ```
+
+(To use Anthropic Claude or OpenAI instead, see [Configuration](#configuration) — no local model needed.)
 
 ### Install dependencies
 
@@ -52,10 +56,10 @@ The scheduler will also run automatically at the time configured in `config.yaml
 ### Prerequisites
 
 - Docker and Docker Compose
-- [Ollama](https://ollama.com) running on your host machine
+- [Ollama](https://ollama.com) running on your host machine (or a cloud LLM provider — see [Configuration](#configuration))
 
 ```bash
-ollama pull qwen3.5:9b-mlx-bf16
+ollama pull qwen3:30b-a3b
 ```
 
 ### Start the service
@@ -75,9 +79,10 @@ The container connects to Ollama on your host via `host.docker.internal`.
 Edit `config.yaml`:
 
 ```yaml
-ollama:
-  model: "qwen3.5:9b-mlx-bf16"
-  base_url: "http://localhost:11434"
+llm:
+  # Provider-agnostic via LiteLLM. The provider is encoded in the model string.
+  model: "ollama/qwen3:30b-a3b"
+  api_base: "http://localhost:11434"   # used by Ollama; ignored for cloud providers
 
 sources:
   hackernews:
@@ -105,11 +110,33 @@ scheduler:
 
 recommender:
   enabled: true
-  max_concurrent: 3        # max parallel Ollama scoring calls
-  score_model: null        # null => reuse ollama.model
+  max_concurrent: 3        # max parallel scoring calls
+  score_model: null        # null => reuse llm.model
 ```
 
-The `OLLAMA_BASE_URL` environment variable overrides `ollama.base_url` (set automatically in Docker Compose).
+### Choosing an LLM provider
+
+The summarizer and recommender call the LLM through [LiteLLM](https://docs.litellm.ai), so switching providers is a config change. The provider is encoded in the `llm.model` string; `llm.api_base` is only used for self-hosted backends like Ollama.
+
+| Provider | `llm.model` | `llm.api_base` | Credentials |
+|---|---|---|---|
+| **Ollama** (local, default) | `ollama/qwen3:30b-a3b` | `http://localhost:11434` | none |
+| **Anthropic Claude** | `anthropic/claude-opus-4-8` | _(omit / leave unused)_ | `ANTHROPIC_API_KEY` env var |
+| **OpenAI** | `openai/gpt-4.1` | _(omit / leave unused)_ | `OPENAI_API_KEY` env var |
+
+To use a cloud provider:
+
+1. Set `llm.model` to the provider-prefixed model string (e.g. `anthropic/claude-opus-4-8` or `openai/gpt-4.1`). For Claude, see the [model list](https://docs.anthropic.com/en/docs/about-claude/models) — e.g. `claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5`.
+2. Export the matching API key before starting the server:
+
+   ```bash
+   export ANTHROPIC_API_KEY="sk-ant-..."   # for Claude
+   export OPENAI_API_KEY="sk-..."           # for OpenAI
+   ```
+
+3. `llm.api_base` is ignored for cloud providers — leave it as-is or remove it. No local model or Ollama is required.
+
+The `LLM_API_BASE` environment variable overrides `llm.api_base` (and the legacy `OLLAMA_BASE_URL` is still honored — set automatically in Docker Compose). These only affect self-hosted backends.
 
 ---
 
@@ -143,9 +170,9 @@ Bulletins older than `retention_days` are deleted automatically.
 ## Troubleshooting
 
 **Bulletin is empty after refresh**
-- Check Ollama is running: `ollama serve` and `ollama list`
-- Confirm the model name matches `config.yaml`
-- Check server logs for scraper errors
+- If using Ollama: check it's running (`ollama serve` and `ollama list`) and that the model matches `config.yaml` (`llm.model` without the `ollama/` prefix)
+- If using a cloud provider: confirm the matching API key env var is set (`ANTHROPIC_API_KEY` / `OPENAI_API_KEY`)
+- Check server logs for scraper or LLM errors
 
 **`Connection refused` / Ollama not reachable in Docker**
 - Confirm Ollama is running on your host

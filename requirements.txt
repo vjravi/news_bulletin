@@ -1,5 +1,6 @@
 langchain-community
 langgraph
+litellm
 httpx
 beautifulsoup4
 jinja2

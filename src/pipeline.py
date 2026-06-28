@@ -12,10 +12,12 @@ def _get_graph():
     return _graph
 
 
-async def run_pipeline(config: dict = None) -> dict:
+async def run_pipeline(config: dict = None, model: str = None) -> dict:
     from src.config import load_config
     if config is None:
         config = load_config()
+    if model:
+        config = {**config, "llm": {**config["llm"], "model": model}}
     from src.graph import PipelineState
     initial_state: PipelineState = {
         "config": config,
@@ -29,10 +31,10 @@ async def run_pipeline(config: dict = None) -> dict:
     )
 
 
-async def try_run_pipeline(config: dict = None) -> bool:
+async def try_run_pipeline(config: dict = None, model: str = None) -> bool:
     """Try to acquire the lock and run. Returns False if already running."""
     if _lock.locked():
         return False
     async with _lock:
-        await run_pipeline(config)
+        await run_pipeline(config, model)
     return True

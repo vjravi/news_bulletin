@@ -3,7 +3,7 @@ import yaml
 from pathlib import Path
 
 
-REQUIRED_KEYS = ["ollama", "sources", "storage", "output"]
+REQUIRED_KEYS = ["llm", "sources", "storage", "output"]
 
 
 def load_config(path: str = None) -> dict:
@@ -16,8 +16,10 @@ def load_config(path: str = None) -> dict:
     if missing:
         raise ValueError(f"config.yaml is missing required keys: {missing}")
 
-    # Allow env var to override Ollama URL (useful in Docker)
-    if os.environ.get("OLLAMA_BASE_URL"):
-        config["ollama"]["base_url"] = os.environ["OLLAMA_BASE_URL"]
+    # Allow env var to override the LLM API base (useful in Docker for local Ollama).
+    # OLLAMA_BASE_URL kept for backward compat; LLM_API_BASE is the provider-agnostic name.
+    api_base_override = os.environ.get("LLM_API_BASE") or os.environ.get("OLLAMA_BASE_URL")
+    if api_base_override:
+        config["llm"]["api_base"] = api_base_override
 
     return config
